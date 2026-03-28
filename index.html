@@ -722,11 +722,23 @@
     const reader = new FileReader();
     reader.onload = function(ev) {
       const result = ev.target.result;
-      imageBase64 = result.split(',')[1];
-      imageType = file.type || 'image/jpeg';
       document.getElementById('previewImg').src = result;
       document.getElementById('previewWrap').style.display = 'block';
       document.getElementById('uploadPlaceholder').style.display = 'none';
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxW = 1280;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+        imageBase64 = compressed.split(',')[1];
+        imageType = 'image/jpeg';
+      };
+      img.src = result;
     };
     reader.readAsDataURL(file);
   }
